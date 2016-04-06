@@ -20,6 +20,7 @@
   NSMutableDictionary *query = [self queryDictionaryForKey:key];
   query[(__bridge id)kSecAttrAccessible] = (__bridge id)[self accessibilityStateCFType];
   query[(__bridge id)kSecValueData] = data;
+  query[(__bridge id)kSecAttrSynchronizable] = @YES;
 
   OSStatus status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
   if (status != noErr) {
@@ -34,7 +35,8 @@
   NSMutableDictionary *query = [self queryDictionaryForKey:key];
   query[(__bridge id)kSecMatchLimit] = (__bridge id)kSecMatchLimitOne;
   query[(__bridge id)kSecReturnData] = (__bridge id)kCFBooleanTrue;
-
+  query[(__bridge id)kSecAttrSynchronizable] = @YES;
+  
   CFTypeRef cfResult;
   OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &cfResult);
   if (status != noErr) {
@@ -51,6 +53,7 @@
 - (BOOL)deleteAllItemsWithError:(NSError **)error {
   NSMutableDictionary *query = [NSMutableDictionary dictionary];
   query[(__bridge id)kSecClass] = (__bridge id)kSecClassGenericPassword;
+  query[(__bridge id)kSecAttrSynchronizable] = @YES;
 
   OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
   if (status != noErr) {
@@ -63,6 +66,7 @@
 
 - (BOOL)deleteItemWithKey:(NSString *)key error:(NSError **)error {
   NSMutableDictionary *query = [self queryDictionaryForKey:key];
+  query[(__bridge id)kSecAttrSynchronizable] = (__bridge id)(kSecAttrSynchronizableAny);
 
   OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
   if (status != noErr) {
@@ -80,6 +84,8 @@
   NSMutableDictionary *updateQuery = [NSMutableDictionary dictionary];
   updateQuery[(__bridge id)kSecValueData] = data;
   updateQuery[(__bridge id)kSecAttrAccessible] = (__bridge id)[self accessibilityStateCFType];
+  updateQuery[(__bridge id)kSecAttrSynchronizable] = @YES;
+
 
   OSStatus status = SecItemUpdate((__bridge CFDictionaryRef)query, (__bridge CFDictionaryRef)updateQuery);
   if (status != noErr) {
